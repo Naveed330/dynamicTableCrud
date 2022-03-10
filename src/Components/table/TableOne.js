@@ -5,38 +5,63 @@ import { GrAddCircle } from "react-icons/gr";
 import { AiFillDelete } from "react-icons/ai";
 import { FiEdit } from "react-icons/fi";
 import "./Table.css";
-import { nanoid } from "nanoid";
+import EditRow from "./EditRow";
+import EditableRow from "./EditableRow";
 const TableOne = () => {
   const [users, setUsers] = useState(Data);
+  const [EditableRows, setEditAbleRow] = useState(null);
+  // const [toggle, setToggle] = useState(true);
+  const [active, setActive] = useState(null);
+
   const [formData, setFormData] = useState({
     firstname: "",
     lastName: "",
     email: "",
   });
+
+  const [EditformData, setEditFormData] = useState();
+
+  // Add Change Handler
   const handlerformchange = (e) => {
     const fieldName = e.target.getAttribute("name");
-
     const fieldValue = e.target.value;
     const NewformData = { ...formData };
-    console.log("fieldName:", fieldName, " kk:", NewformData);
     NewformData[fieldName] = fieldValue;
-    console.log("newformdata", NewformData);
     setFormData(NewformData);
   };
+  // Add Handler
   const AddHandler = (e) => {
     e.preventDefault();
     const newuser = {
-      // id:nanoid(),
       FirstName: formData.firstname,
       LastName: formData.lastName,
       Email: formData.email,
     };
-    console.log("newuser", newuser);
     const newUsers = [...users, newuser];
     setUsers(newUsers);
   };
-  const removeuser = (index) => {
+  // OnChange EditHandler
+  const HandlerEditformChange = (e) => {
+    e.preventDefault();
+    const fieldName = e.target.getAttribute("name");
+    const fieldValue = e.target.value;
+    const newData = { ...EditformData };
+    newData[fieldName] = fieldValue;
+    setEditFormData(newData);
+  };
+  // Edit Handler
+  const EditHandler = (e, ID) => {
+    document.getElementById(`${ID}_fname`).contentEditable = "true";
+    document.getElementById(`${ID}_lname`).contentEditable = "true";
+    document.getElementById(`${ID}_email`).contentEditable = "true";
+    // setToggle(false);
+    setActive(ID);
+  };
+
+  // Delete Handler
+  const removeuser = (contactId, id) => {
     const filterUser = [...users];
+    const index = users.findIndex((e) => users.id === contactId);
     filterUser.splice(index, 1);
     setUsers(filterUser);
   };
@@ -75,40 +100,43 @@ const TableOne = () => {
               </Button>
             </div>
           </div>
-
           <div className="row">
-            <div className="col-md-12 col-sm-12">
-              <Table striped bordered hover variant="dark">
-                <thead>
-                  <tr>
-                    {/* <th>#</th> */}
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((value, index) => (
+            <div className="col-md-12 col-sm-12 table_manage_width">
+              <form>
+                <Table striped bordered hover variant="dark">
+                  <thead>
                     <tr>
-                      {/* <td> {value.id} </td> */}
-                      <td>{value.FirstName} </td>
-                      <td>{value.LastName} </td>
-                      <td>{value.Email} </td>
-                      <td>
-                        <FiEdit size={20} color="green" cursor={"pointer"} />
-                        <AiFillDelete
-                          size={25}
-                          color="red"
-                          cursor={"pointer"}
-                          onClick={() => removeuser(index)}
-                          style={{ marginLeft: "10px" }}
-                        />
-                      </td>
+                      <th>First Name {active}</th>
+                      <th>Last Name</th>
+                      <th>Username</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {users.map((value, index) => (
+                      <>
+                        {EditableRows === value.id ? (
+                          <EditableRow
+                            EditformData={EditformData}
+                            HandlerEditformChange={HandlerEditformChange}
+                          />
+                        ) : (
+                          <EditRow
+                            value={value}
+                            EditHandler={EditHandler}
+                            removeuser={removeuser}
+                            index={index}
+                            setUsers={setUsers}
+                            users={users}
+                            active={active}
+                            setActive={setActive}
+                          />
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </Table>
+              </form>
             </div>
           </div>
         </div>
